@@ -1,4 +1,4 @@
-[
+export default ordersData = [
   {
     orderId: 1,
     orderNumber: "ORD123456",
@@ -11,7 +11,7 @@
       address: "456 Oak Avenue, Townsville",
       location: "456 Oak Avenue, Townsville",
     },
-    status: "placed",
+    status: "pending",
   },
   {
     orderId: 2,
@@ -53,6 +53,6 @@
       address: "901 Walnut Lane, Villageville",
       location: "901 Walnut Lane, Villageville",
     },
-    status: "placed",
+    status: "pending",
   },
 ];
