@@ -53,7 +53,14 @@ const HomeScreen = () => {
             selectedTab === "pending" && styles.selectedTabButton,
           ]}
         >
-          <Text>Pending Orders</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "pending" && styles.activeTabText,
+            ]}
+          >
+            Pending
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setSelectedTab("picked")}
@@ -62,7 +69,14 @@ const HomeScreen = () => {
             selectedTab === "picked" && styles.selectedTabButton,
           ]}
         >
-          <Text>Picked Orders</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "picked" && styles.activeTabText,
+            ]}
+          >
+            Picked
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setSelectedTab("completed")}
@@ -71,7 +85,14 @@ const HomeScreen = () => {
             selectedTab === "completed" && styles.selectedTabButton,
           ]}
         >
-          <Text>Completed Orders</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === "completed" && styles.activeTabText,
+            ]}
+          >
+            Completed
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -82,10 +103,16 @@ const HomeScreen = () => {
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => handleOrderItemClick(item)}>
             <View style={styles.orderItem}>
-              <Text>Order Number: {item.orderNumber}</Text>
-              <Text>Restaurant: {item.restaurant.name}</Text>
-              <Text>Customer: {item.customer.name}</Text>
-              <Text>Status: {item.status}</Text>
+              <Text style={styles.orderText}>
+                Order Number: {item.orderNumber}
+              </Text>
+              <Text style={styles.orderText}>
+                Restaurant: {item.restaurant.name}
+              </Text>
+              <Text style={styles.orderText}>
+                Customer: {item.customer.name}
+              </Text>
+              <Text style={styles.orderStatus}>Status: {item.status}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -102,14 +129,22 @@ const HomeScreen = () => {
           <View style={styles.modalContent}>
             {selectedOrder && (
               <View>
-                <Text>Order Number: {selectedOrder.orderNumber}</Text>
-                <Text>Restaurant: {selectedOrder.restaurant.name}</Text>
-                <Text>Customer: {selectedOrder.customer.name}</Text>
-                <Text>Status: {selectedOrder.status}</Text>
+                <Text style={styles.modalText}>
+                  Order Number: {selectedOrder.orderNumber}
+                </Text>
+                <Text style={styles.modalText}>
+                  Restaurant: {selectedOrder.restaurant.name}
+                </Text>
+                <Text style={styles.modalText}>
+                  Customer: {selectedOrder.customer.name}
+                </Text>
+                <Text style={styles.modalText}>
+                  Status: {selectedOrder.status}
+                </Text>
               </View>
             )}
             <TouchableOpacity onPress={() => setShowModal(false)}>
-              <Text>Close</Text>
+              <Text style={styles.closeButton}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -121,22 +156,43 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f0f0f0",
   },
   tabsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     paddingVertical: 10,
     borderBottomWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#007bff",
   },
   tabButton: {
     padding: 10,
   },
   selectedTabButton: {
     borderBottomWidth: 2,
+    borderColor: "#007bff",
+  },
+  tabText: {
+    fontWeight: "bold",
+    color: "#888",
+  },
+  activeTabText: {
+    color: "#fff",
   },
   orderItem: {
     padding: 10,
     borderBottomWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+  },
+  orderText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  orderStatus: {
+    color: "#007bff",
+    fontWeight: "bold",
   },
   modalContainer: {
     flex: 1,
@@ -149,6 +205,15 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  closeButton: {
+    color: "#007bff",
+    fontWeight: "bold",
+    marginTop: 10,
   },
 });
 
