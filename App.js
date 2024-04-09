@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome5 } from "@expo/vector-icons";
 import LoginScreen from "./src/screens/Login";
@@ -10,14 +9,14 @@ import CurrentOrder from "./src/screens/CurrentOrder";
 import ProfileScreen from "./src/screens/Profile";
 import Header from "./src/components/Header";
 
-const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
 
   return (
     <NavigationContainer>
+      <StatusBar />
       {loggedIn ? (
         <SafeAreaView style={styles.container}>
           {/* Status bar with current location */}
@@ -52,13 +51,7 @@ const App = () => {
         </SafeAreaView>
       ) : (
         <SafeAreaView style={styles.container}>
-          <Stack.Navigator>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-          </Stack.Navigator>
+          <LoginScreen />
         </SafeAreaView>
       )}
     </NavigationContainer>
