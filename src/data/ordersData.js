@@ -54,5 +54,17 @@ export default ordersData = [
       location: "901 Walnut Lane, Villageville",
     },
     status: "pending",
+    orderId: 5,
+    orderNumber: "ORD901234",
+    restaurant: {
+      name: "Burger Barn",
+      location: "901 Oak Street, Hamletton",
+    },
+    customer: {
+      name: "Bob Wilson",
+      address: "901 Walnut Lane, Villageville",
+      location: "901 Walnut Lane, Villageville",
+    },
+    status: "accepted",
   },
 ];

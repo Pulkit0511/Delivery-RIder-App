@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,16 +8,43 @@ import {
   Modal,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
-// Dummy data
-import ordersData from "../data/ordersData";
+import { Picker } from "@react-native-picker/picker";
+import axios from "axios";
+import { GET_ALL_ORDERS } from "@env";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [selectedTab, setSelectedTab] = useState("pending"); // State to track selected tab
-  const [orders, setOrders] = useState(ordersData); // State to hold orders data
+  const [selectedStatus, setSelectedStatus] = useState("pending"); // State to hold the selected status
   const [selectedOrder, setSelectedOrder] = useState(null); // State to hold the selected order
   const [showModal, setShowModal] = useState(false); // State to control the modal visibility
+  const [orders, setOrders] = useState([]); // State to hold orders
+  const [allOrders, setAllOrders] = useState([]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get(GET_ALL_ORDERS);
+      setAllOrders(() => response.data.data);
+      // console.log(response.data.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedStatus === "pending") {
+      setOrders(allOrders.filter((order) => order.status === "pending"));
+    } else if (selectedStatus === "picked") {
+      setOrders(allOrders.filter((order) => order.status === "picked up"));
+    } else if (selectedStatus === "completed") {
+      setOrders(allOrders.filter((order) => order.status === "delivered"));
+    } else if (selectedStatus === "accepted") {
+      setOrders(allOrders.filter((order) => order.status === "accepted"));
+    }
+  }, [allOrders, selectedStatus]);
 
   // Function to handle order item click
   const handleOrderItemClick = (order) => {
@@ -31,92 +58,45 @@ const HomeScreen = () => {
     }
   };
 
-  // Function to filter orders based on the selected tab
-  useEffect(() => {
-    if (selectedTab === "pending") {
-      setOrders(ordersData.filter((order) => order.status === "pending"));
-    } else if (selectedTab === "picked") {
-      setOrders(ordersData.filter((order) => order.status === "picked up"));
-    } else if (selectedTab === "completed") {
-      setOrders(ordersData.filter((order) => order.status === "delivered"));
-    }
-  }, [selectedTab]);
+  // Function to filter orders based on the selected status
 
   return (
     <View style={styles.container}>
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          onPress={() => setSelectedTab("pending")}
-          style={[
-            styles.tabButton,
-            selectedTab === "pending" && styles.selectedTabButton,
-          ]}
+      {/* Status dropdown */}
+      <View style={styles.dropdownContainer}>
+        <Picker
+          selectedValue={selectedStatus}
+          onValueChange={(itemValue) => setSelectedStatus(itemValue)}
+          style={styles.dropdown}
         >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === "pending" && styles.activeTabText,
-            ]}
-          >
-            Pending
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setSelectedTab("picked")}
-          style={[
-            styles.tabButton,
-            selectedTab === "picked" && styles.selectedTabButton,
-          ]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === "picked" && styles.activeTabText,
-            ]}
-          >
-            Picked
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setSelectedTab("completed")}
-          style={[
-            styles.tabButton,
-            selectedTab === "completed" && styles.selectedTabButton,
-          ]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === "completed" && styles.activeTabText,
-            ]}
-          >
-            Completed
-          </Text>
-        </TouchableOpacity>
+          <Picker.Item label="Pending Orders" value="pending" />
+          <Picker.Item label="Accepted Orders" value="accepted" />
+          <Picker.Item label="Picked Orders" value="picked" />
+          <Picker.Item label="Completed Orders" value="completed" />
+        </Picker>
       </View>
 
       {/* Orders List */}
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item.orderId.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleOrderItemClick(item)}>
-            <View style={styles.orderItem}>
-              <Text style={styles.orderText}>
-                Order Number: {item.orderNumber}
-              </Text>
-              <Text style={styles.orderText}>
-                Restaurant: {item.restaurant.name}
-              </Text>
-              <Text style={styles.orderText}>
-                Customer: {item.customer.name}
-              </Text>
-              <Text style={styles.orderStatus}>Status: {item.status}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+      {orders && (
+        <FlatList
+          data={orders}
+          keyExtractor={(item) => item.orderId.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleOrderItemClick(item)}>
+              <View style={styles.orderItem}>
+                <Text style={styles.orderText}>
+                  Customer Name: {item.customer}
+                </Text>
+                <Text style={styles.orderText}>
+                  Restaurant Name: {item.restaurant}
+                </Text>
+                <Text style={styles.orderText}>Price: {item.price}</Text>
+                <Text style={styles.orderStatus}>Status: {item.status}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
 
       {/* Modal for Completed Orders */}
       <Modal
@@ -158,26 +138,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f0f0f0",
   },
-  tabsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
+  dropdownContainer: {
     backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
-  tabButton: {
-    padding: 10,
-  },
-  selectedTabButton: {
-    borderBottomWidth: 2,
-    borderColor: "#007bff",
-  },
-  tabText: {
-    fontWeight: "bold",
-    color: "#888",
-  },
-  activeTabText: {
+  dropdown: {
     color: "#fff",
   },
   orderItem: {
