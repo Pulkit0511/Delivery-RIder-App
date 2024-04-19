@@ -1,34 +1,28 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-} from "react-native";
+import { View, FlatList, StyleSheet, Modal } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
-import { GET_ALL_ORDERS } from "@env";
+import { API } from "@env";
+import Dropdown from "../components/Dropdown";
+import OrderItem from "../components/OrderItem";
+import ModalContent from "../components/Modal";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [selectedStatus, setSelectedStatus] = useState("pending"); // State to hold the selected status
-  const [selectedOrder, setSelectedOrder] = useState(null); // State to hold the selected order
-  const [showModal, setShowModal] = useState(false); // State to control the modal visibility
-  const [orders, setOrders] = useState([]); // State to hold orders
+  const [selectedStatus, setSelectedStatus] = useState("pending");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [orders, setOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [allOrders]);
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(GET_ALL_ORDERS);
-      setAllOrders(() => response.data.data);
-      // console.log(response.data.data);
+      const response = await axios.get(API);
+      setAllOrders(response.data.data);
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -46,88 +40,43 @@ const HomeScreen = () => {
     }
   }, [allOrders, selectedStatus]);
 
-  // Function to handle order item click
   const handleOrderItemClick = (order) => {
-    if (order.status === "pending" || order.status === "picked up") {
-      // Navigate to CurrentOrder screen and send the selected order as a prop
-      navigation.navigate("CurrentOrder", { selectedOrder: order });
-    } else if (order.status === "delivered") {
-      // Show modal with order details
+    if (order.status === "delivered") {
       setSelectedOrder(order);
       setShowModal(true);
+    } else {
+      navigation.navigate("CurrentOrder", { selectedOrder: order });
     }
   };
 
-  // Function to filter orders based on the selected status
-
   return (
     <View style={styles.container}>
-      {/* Status dropdown */}
-      <View style={styles.dropdownContainer}>
-        <Picker
-          selectedValue={selectedStatus}
-          onValueChange={(itemValue) => setSelectedStatus(itemValue)}
-          style={styles.dropdown}
-        >
-          <Picker.Item label="Pending Orders" value="pending" />
-          <Picker.Item label="Accepted Orders" value="accepted" />
-          <Picker.Item label="Picked Orders" value="picked" />
-          <Picker.Item label="Completed Orders" value="completed" />
-        </Picker>
-      </View>
-
-      {/* Orders List */}
+      <Dropdown
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+      />
       {orders && (
         <FlatList
           data={orders}
-          keyExtractor={(item) => item.orderId.toString()}
+          keyExtractor={(item) => item._id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleOrderItemClick(item)}>
-              <View style={styles.orderItem}>
-                <Text style={styles.orderText}>
-                  Customer Name: {item.customer}
-                </Text>
-                <Text style={styles.orderText}>
-                  Restaurant Name: {item.restaurant}
-                </Text>
-                <Text style={styles.orderText}>Price: {item.price}</Text>
-                <Text style={styles.orderStatus}>Status: {item.status}</Text>
-              </View>
-            </TouchableOpacity>
+            <OrderItem
+              item={item}
+              handleOrderItemClick={handleOrderItemClick}
+            />
           )}
         />
       )}
-
-      {/* Modal for Completed Orders */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={showModal}
         onRequestClose={() => setShowModal(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {selectedOrder && (
-              <View>
-                <Text style={styles.modalText}>
-                  Order Number: {selectedOrder.orderNumber}
-                </Text>
-                <Text style={styles.modalText}>
-                  Restaurant: {selectedOrder.restaurant.name}
-                </Text>
-                <Text style={styles.modalText}>
-                  Customer: {selectedOrder.customer.name}
-                </Text>
-                <Text style={styles.modalText}>
-                  Status: {selectedOrder.status}
-                </Text>
-              </View>
-            )}
-            <TouchableOpacity onPress={() => setShowModal(false)}>
-              <Text style={styles.closeButton}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <ModalContent
+          selectedOrder={selectedOrder}
+          setShowModal={setShowModal}
+        />
       </Modal>
     </View>
   );
@@ -137,50 +86,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f0f0",
-  },
-  dropdownContainer: {
-    backgroundColor: "#007bff",
-    paddingVertical: 10,
     paddingHorizontal: 20,
-    marginBottom: 10,
-  },
-  dropdown: {
-    color: "#fff",
-  },
-  orderItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-  },
-  orderText: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  orderStatus: {
-    color: "#007bff",
-    fontWeight: "bold",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  closeButton: {
-    color: "#007bff",
-    fontWeight: "bold",
-    marginTop: 10,
+    paddingTop: 20,
   },
 });
 
