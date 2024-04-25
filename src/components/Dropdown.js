@@ -1,7 +1,8 @@
+import React from "react";
 import { Picker } from "@react-native-picker/picker";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 
-export default Dropdown = ({ selectedStatus, setSelectedStatus }) => {
+const Dropdown = ({ selectedStatus, setSelectedStatus }) => {
   return (
     <View style={styles.dropdownContainer}>
       <Picker
@@ -20,14 +21,21 @@ export default Dropdown = ({ selectedStatus, setSelectedStatus }) => {
 
 const styles = StyleSheet.create({
   dropdownContainer: {
+    height: 50,
+    justifyContent: "center",
     backgroundColor: "#007bff",
-    paddingVertical: 10,
     paddingHorizontal: 20,
-    marginBottom: 20,
     borderRadius: 10,
-    fontSize: 18, // Increase font size
+    borderWidth: 1,
+    borderColor: "#007bff",
+    overflow: "hidden",
+    elevation: 3,
+    marginBottom: 6,
   },
   dropdown: {
     color: "#fff",
+    fontSize: 16,
   },
 });
+
+export default Dropdown;

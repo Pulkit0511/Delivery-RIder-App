@@ -1,6 +1,7 @@
+import React from "react";
 import { View, Text } from "react-native";
 
-export default Header = () => {
+const Header = ({ location }) => {
   return (
     <View
       style={{
@@ -10,7 +11,12 @@ export default Header = () => {
         paddingHorizontal: 10,
       }}
     >
-      <Text>Current Location: Your Location</Text>
+      <Text>
+        Current Location:{" "}
+        {location ? `${location.latitude}, ${location.longitude}` : "Unknown"}
+      </Text>
     </View>
   );
 };
+
+export default Header;

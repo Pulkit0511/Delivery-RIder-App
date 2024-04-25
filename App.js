@@ -1,6 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Alert,
+  PermissionsAndroid,
+} from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome5 } from "@expo/vector-icons";
 import LoginScreen from "./src/screens/Login";
@@ -8,20 +14,37 @@ import HomeScreen from "./src/screens/Home";
 import CurrentOrder from "./src/screens/CurrentOrder";
 import ProfileScreen from "./src/screens/Profile";
 import Header from "./src/components/Header";
+import * as Location from "expo-location";
 
 const Tab = createBottomTabNavigator();
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(true);
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    requestLocation();
+  }, []);
+
+  const requestLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({});
+        setLocation(location.coords);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <NavigationContainer>
       <StatusBar />
       {loggedIn ? (
         <SafeAreaView style={styles.container}>
-          {/* Status bar with current location */}
-          <Header />
-          {/* Tab navigator */}
+          <Header location={location} />
           <Tab.Navigator
             screenOptions={({ route }) => ({
               tabBarStyle: styles.tabBar,
@@ -46,7 +69,9 @@ const App = () => {
           >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="CurrentOrder" component={CurrentOrder} />
-            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen name="Profile">
+              {() => <ProfileScreen location={location} />}
+            </Tab.Screen>
           </Tab.Navigator>
         </SafeAreaView>
       ) : (

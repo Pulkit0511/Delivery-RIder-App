@@ -4,19 +4,44 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { API } from "@env";
+import Toast from "react-native-toast-message";
 
-const OrderItem = ({ item, handleOrderItemClick }) => {
-  const handleAcceptOrder = async () => {
+const OrderItem = ({ item, handleOrderItemClick, updateOrders }) => {
+  const handleOrderAction = async (status) => {
+    const statusMap = {
+      accept: "accepted",
+      pick: "picked up",
+      complete: "delivered",
+    };
+
     try {
-      // Send a request to update the order status to "accepted"
       await axios.put(`${API}/${item._id}`, {
-        status: "accepted",
+        status: statusMap[status],
       });
-      // Fetch orders again to update the list
-      //   fetchOrders();
+      updateOrders();
+      showToast(`Order status successfully updated to ${statusMap[status]}`);
     } catch (error) {
-      console.error("Error accepting order:", error);
+      console.error(`Error ${status}ing order:`, error);
     }
+  };
+
+  const showToast = (message) => {
+    Toast.show({
+      type: "success",
+      position: "bottom",
+      text1: "Success!",
+      text2: message,
+      visibilityTime: 2000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: {
+        fontSize: 16,
+      },
+      text2Style: {
+        fontSize: 14,
+      },
+    });
   };
 
   return (
@@ -28,11 +53,29 @@ const OrderItem = ({ item, handleOrderItemClick }) => {
         <Text style={styles.orderInfo}>{item.customer}</Text>
         <Text style={styles.orderTitle}>Price: </Text>
         <Text style={styles.orderInfo}>${item.price}</Text>
-        {/* Accept Order Icon */}
+        {/* Check mark for accepted order */}
+        {item.status === "accepted" && (
+          <TouchableOpacity
+            onPress={() => handleOrderAction("pick")}
+            style={[styles.iconContainer, { backgroundColor: "blue" }]}
+          >
+            <FontAwesomeIcon icon={faCheck} style={styles.acceptIcon} />
+          </TouchableOpacity>
+        )}
+        {/* Check mark for picked order */}
+        {item.status === "picked up" && (
+          <TouchableOpacity
+            onPress={() => handleOrderAction("complete")}
+            style={[styles.iconContainer, { backgroundColor: "orange" }]}
+          >
+            <FontAwesomeIcon icon={faCheck} style={styles.acceptIcon} />
+          </TouchableOpacity>
+        )}
+        {/* Check mark for pending order */}
         {item.status === "pending" && (
           <TouchableOpacity
-            onPress={handleAcceptOrder}
-            style={styles.iconContainer}
+            onPress={() => handleOrderAction("accept")}
+            style={[styles.iconContainer, { backgroundColor: "green" }]}
           >
             <FontAwesomeIcon icon={faCheck} style={styles.acceptIcon} />
           </TouchableOpacity>
@@ -51,6 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10,
     borderRadius: 10,
+    position: "relative",
   },
   orderTitle: {
     fontSize: 14,
@@ -66,7 +110,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "green",
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
